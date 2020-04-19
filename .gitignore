@@ -27,3 +27,5 @@ build
 .idea
 run
 *.iml
+Concern.class
+out

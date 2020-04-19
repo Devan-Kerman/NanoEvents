@@ -1,5 +1,7 @@
 package net.devtech.nanoevents.evtparser;
 
+import net.devtech.nanoevents.util.Id;
+import net.devtech.nanoevents.util.MixinPath;
 import net.minecraft.util.Pair;
 import java.io.EOFException;
 import java.io.IOException;
@@ -9,11 +11,28 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Properties;
 
+/**
+ * the parser and container of data for the EVT file format,
+ * the evt format is essentially
+ *
+ * mod:namespace {
+ *     // normal properties file inside but all whitespaces are removed, including the ones in strings
+ * }
+ */
 public class Evt {
+	/**
+	 * the id of the event
+	 */
 	private final Id id;
+	/**
+	 * the method signature of the invoker
+	 */
 	private final String invoker;
+	/**
+	 * the mixin predicates, this determines whether or not a mixin should be applied
+	 */
 	private final Collection<MixinPath> mixins;
-	private boolean enabled;
+
 
 	/**
 	 * parse the Evt config
@@ -69,15 +88,6 @@ public class Evt {
 		this.id = id;
 		this.invoker = invoker;
 		this.mixins = mixins;
-	}
-
-
-	public boolean isEnabled() {
-		return enabled;
-	}
-
-	public void setEnabled(boolean enabled) {
-		this.enabled = enabled;
 	}
 
 	public Id getId() {

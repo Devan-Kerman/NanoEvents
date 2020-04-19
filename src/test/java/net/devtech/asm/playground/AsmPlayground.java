@@ -1,6 +1,6 @@
 package net.devtech.asm.playground;
 
-import net.devtech.nanoevents.invokers.Invoker;
+import net.devtech.nanoevents.api.Invoker;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.BlockPos;

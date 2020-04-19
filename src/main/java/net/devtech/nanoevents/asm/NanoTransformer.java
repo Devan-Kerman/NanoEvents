@@ -3,8 +3,8 @@ package net.devtech.nanoevents.asm;
 import com.chocohead.mm.api.ClassTinkerers;
 import net.devtech.nanoevents.NanoEvents;
 import net.devtech.nanoevents.evtparser.Evt;
-import net.devtech.nanoevents.evtparser.Id;
-import net.devtech.nanoevents.invokers.Invoker;
+import net.devtech.nanoevents.util.Id;
+import net.devtech.nanoevents.api.Invoker;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.*;
@@ -107,10 +107,9 @@ public class NanoTransformer implements Runnable {
 						// parse the listener reference
 						int classIndex = listenerReference.indexOf('#');
 						if (classIndex == -1) {
-							// todo better error handling other than just hanging the game until a stack overflow error
 							LOGGER.severe("Bad method signature " + listenerReference);
 							replacementNode.owner = "null";
-							replacementNode.name = "";
+							replacementNode.name = "READ_THE_LOGS";
 						} else {
 							replacementNode.owner = listenerReference.substring(0, classIndex).replace('.', '/');
 							replacementNode.name = listenerReference.substring(classIndex + 1);
@@ -123,6 +122,13 @@ public class NanoTransformer implements Runnable {
 		}
 	}
 
+	/**
+	 * clone and remove the instructions between the start and end index of the method
+	 * @param list the original instructions
+	 * @param startIndex the index-1 where to start
+	 * @param endIndex the last index to copy + 1
+	 * @return the newly copied list
+	 */
 	public static InsnList cut(InsnList list, int startIndex, int endIndex) {
 		InsnList clone = clone(list, startIndex + 1, endIndex, a -> a);
 		for (int idex = endIndex; idex >= startIndex; idex--) {
@@ -134,8 +140,9 @@ public class NanoTransformer implements Runnable {
 
 
 	/**
+	 * clones the list
 	 * Copied from https://github.com/Chocohead/Merger under MPL
-	 * i changed it but pls no sue kthnksbai
+	 * Modified to suit my purposes
 	 */
 	public static InsnList clone(InsnList list, int fromIndex, int toIndex, Function<AbstractInsnNode, AbstractInsnNode> transformer) {
 		Map<LabelNode, LabelNode> clonedLabels = new IdentityHashMap<>();

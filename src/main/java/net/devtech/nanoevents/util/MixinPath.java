@@ -1,4 +1,4 @@
-package net.devtech.nanoevents.evtparser;
+package net.devtech.nanoevents.util;
 
 /**
  * a path to a class

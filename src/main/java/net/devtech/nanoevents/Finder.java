@@ -1,7 +1,7 @@
 package net.devtech.nanoevents;
 
 import net.devtech.nanoevents.evtparser.Evt;
-import net.devtech.nanoevents.evtparser.Id;
+import net.devtech.nanoevents.util.Id;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
 import net.fabricmc.loader.api.metadata.CustomValue;
@@ -47,6 +47,9 @@ class Finder {
 		return listeners;
 	}
 
+	/**
+	 * find all the events declared in each mod
+	 */
 	public static Map<Id, Evt> getAllEvts() {
 		Map<Id, Evt> events = new HashMap<>();
 		forVal("nano:evt", (m, c) -> {
@@ -66,6 +69,9 @@ class Finder {
 		return events;
 	}
 
+	/**
+	 * util method for files in custom mod jsons
+	 */
 	private static void forVal(String val, BiConsumer<ModContainer, String> consumer) {
 		for (ModContainer mod : FabricLoader.getInstance().getAllMods()) {
 			ModMetadata metadata = mod.getMetadata();
