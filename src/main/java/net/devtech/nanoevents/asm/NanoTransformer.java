@@ -9,16 +9,14 @@ import net.devtech.nanoevents.util.Id;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.*;
-import java.util.Collection;
-import java.util.IdentityHashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 import java.util.logging.Logger;
 
 
 public class NanoTransformer implements Runnable {
 	private static final String LOGIC_TYPE = Type.getInternalName(Logic.class);
-	private static final String INVOKER_TYPE = Type.getInternalName(Invoker.class);
+	private static final String INVOKER_TYPE = 'L'+Type.getInternalName(Invoker.class)+';';
 	private static final Logger LOGGER = Logger.getLogger("NanoTransformer");
 
 	@Override
@@ -29,15 +27,19 @@ public class NanoTransformer implements Runnable {
 			int hashTagIndex = invoker.indexOf('#');
 			if (hashTagIndex != -1) {
 				String classSignature = invoker.substring(0, hashTagIndex);
-				String methodName = invoker.substring(hashTagIndex+1);
+				String methodName = invoker.substring(hashTagIndex + 1);
 				ClassTinkerers.addTransformation(classSignature.replace('.', '/'), invokerClass -> {
 					for (MethodNode method : invokerClass.methods) {
-						for (AnnotationNode annotation : method.invisibleAnnotations) {
-							Id id = entry.getKey();
-							if(annotation.desc.equals(INVOKER_TYPE) && "value".equals(annotation.values.get(0)) && id.toString().equals(annotation.values.get(1))) { // todo check namespace
-								if (method.name.equals(methodName)) {
-									transform(NanoEvents.LISTENERS.get(id), method, invoker, classSignature);
-									return;
+						List<AnnotationNode> annotations = method.invisibleAnnotations;
+						if (annotations != null && !annotations.isEmpty()) {
+							for (AnnotationNode annotation : annotations) {
+								Id id = entry.getKey();
+								List<Object> vals = annotation.values;
+								if (annotation.desc.equals(INVOKER_TYPE) && "value".equals(vals.get(0)) && vals.get(1).equals(id.toString())) { // todo check namespace
+									if (method.name.equals(methodName)) {
+										transform(NanoEvents.LISTENERS.get(id), method, invoker, classSignature);
+										return;
+									}
 								}
 							}
 						}
@@ -109,13 +111,13 @@ public class NanoTransformer implements Runnable {
 	 */
 	public static void paste(Collection<String> listenerReferences, MethodNode node, InsnList insnCopy, InsnList list, String type, int startIndex) {
 		AbstractInsnNode start = list.get(startIndex);
+		String replaced = type.replace('.', '/');
 		for (String listenerReference : listenerReferences) {
 			InsnList modCopy = clone(insnCopy, 0, insnCopy.size(), a -> { // copy the copied instruction list, but replace the recursive call with a listener one
 				if (a instanceof MethodInsnNode) {
 					MethodInsnNode replacementNode = (MethodInsnNode) a;
-
 					// check if method call is the right one
-					if (replacementNode.name.equals(node.name) && replacementNode.owner.equals(type) && replacementNode.desc.equals(node.desc)) {
+					if (replacementNode.name.equals(node.name) && replacementNode.owner.equals(replaced) && replacementNode.desc.equals(node.desc)) {
 						// parse the listener reference
 						int classIndex = listenerReference.indexOf('#');
 						if (classIndex == -1) {
@@ -142,7 +144,6 @@ public class NanoTransformer implements Runnable {
 	public static InsnList clone(InsnList list, int fromIndex, int toIndex, Function<AbstractInsnNode, AbstractInsnNode> transformer) {
 		Map<LabelNode, LabelNode> clonedLabels = new IdentityHashMap<>();
 		Map<Label, Label> trueLabels = new IdentityHashMap<>();
-
 		boolean seenFrame = false;
 		for (int i = fromIndex; i < toIndex; i++) {
 			AbstractInsnNode insn = list.get(i);

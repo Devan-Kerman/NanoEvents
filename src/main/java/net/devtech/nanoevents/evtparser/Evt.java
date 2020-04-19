@@ -51,7 +51,7 @@ public class Evt {
 		while ((chr = reader.read()) != -1) {
 			if (!Character.isWhitespace(chr)) {
 				if (chr == '{') break;
-				idBuilder.append(chr);
+				idBuilder.append((char)chr);
 			}
 		}
 
@@ -62,7 +62,7 @@ public class Evt {
 		while ((chr = reader.read()) != -1) {
 			if (!Character.isWhitespace(chr) || chr == '\n') {
 				if (chr == '}') break;
-				inner.append(chr);
+				inner.append((char)chr);
 			}
 		}
 

@@ -20,7 +20,9 @@ public class NanoEvents {
 
 	static {
 		for (Id id : LISTENERS.keySet()) {
-			if (LISTENERS.containsKey(id)) ENABLED.addAll(EVENTS.get(id).getMixins());
+			if (LISTENERS.containsKey(id)) {
+				ENABLED.addAll(EVENTS.get(id).getMixins());
+			}
 		}
 	}
 	// ========== do not touch ==========

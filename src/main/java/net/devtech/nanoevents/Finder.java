@@ -37,11 +37,12 @@ class Finder {
 					if (colonIndex == -1) {
 						LOGGER.severe("Invalid identifier: " + eventId + " in " + c + " in " + m.getMetadata().getId());
 					} else {
-						listeners.computeIfAbsent(new Id(listener.substring(0, colonIndex), listener.substring(colonIndex + 1)), i -> new ArrayList<>()).add(listener);
+						listeners.computeIfAbsent(new Id(eventId.substring(0, colonIndex), eventId.substring(colonIndex + 1)), i -> new ArrayList<>()).add(listener);
 					}
 				}
 			} catch (IOException e) {
-				LOGGER.severe("error in reading events in " + path + " in mod " + m.getMetadata().getId());
+				LOGGER.severe("error in reading listneers in " + path + " in mod " + m.getMetadata().getId());
+				e.printStackTrace();
 			}
 		});
 		return listeners;
@@ -54,10 +55,12 @@ class Finder {
 		for (ModContainer mod : FabricLoader.getInstance().getAllMods()) {
 			ModMetadata metadata = mod.getMetadata();
 			CustomValue value = metadata.getCustomValue(val);
-			if (value.getType() == CustomValue.CvType.STRING) consumer.accept(mod, value.getAsString());
-			else if (value.getType() == CustomValue.CvType.ARRAY) for (CustomValue customValue : value.getAsArray()) {
-				if (customValue.getType() == CustomValue.CvType.STRING) consumer.accept(mod, customValue.getAsString());
-				else LOGGER.severe("Invalid type in array: " + value + " mod: " + metadata.getId());
+			if(value != null) {
+				if (value.getType() == CustomValue.CvType.STRING) consumer.accept(mod, value.getAsString());
+				else if (value.getType() == CustomValue.CvType.ARRAY) for (CustomValue customValue : value.getAsArray()) {
+					if (customValue.getType() == CustomValue.CvType.STRING) consumer.accept(mod, customValue.getAsString());
+					else LOGGER.severe("Invalid type in array: " + value + " mod: " + metadata.getId());
+				}
 			}
 		}
 	}
@@ -79,6 +82,7 @@ class Finder {
 				}
 			} catch (IOException e) {
 				LOGGER.severe("error in parsing events in " + path + " in mod " + m.getMetadata().getId());
+				e.printStackTrace();
 			}
 		});
 		return events;
