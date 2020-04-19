@@ -1,7 +1,6 @@
 package net.devtech.nanoevents.api;
 
 import net.devtech.nanoevents.NanoEvents;
-import net.devtech.nanoevents.plugin.NanoEventMixinPlugin;
 import net.devtech.nanoevents.util.Id;
 import net.devtech.nanoevents.util.MixinPath;
 
@@ -16,7 +15,7 @@ public class NanoEventsAPI {
 
 	/**
 	 * checks if the mixin was applied
-	 *
+	 * <p>
 	 * or, for internal use: should this mixin be applied
 	 */
 	public static boolean wasApplied(String mixinClassName) {

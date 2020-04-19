@@ -2,9 +2,9 @@ package net.devtech.nanoevents.asm;
 
 import com.chocohead.mm.api.ClassTinkerers;
 import net.devtech.nanoevents.NanoEvents;
+import net.devtech.nanoevents.api.Invoker;
 import net.devtech.nanoevents.evtparser.Evt;
 import net.devtech.nanoevents.util.Id;
-import net.devtech.nanoevents.api.Invoker;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.*;
@@ -14,7 +14,7 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.logging.Logger;
 
-// todo add a throw exception at the top of event handler methods that suck ass
+
 public class NanoTransformer implements Runnable {
 	private static final String INVOKER_TYPE = Type.getInternalName(Invoker.class);
 	private static final Logger LOGGER = Logger.getLogger("NanoTransformer");
@@ -49,8 +49,7 @@ public class NanoTransformer implements Runnable {
 					}
 					LOGGER.severe("No invoker found for " + evt.getId() + " '" + invoker + "'!");
 				});
-			} else
-				LOGGER.severe("Invalid class signature for " + evt.getId() + " '" + invoker + "'");
+			} else LOGGER.severe("Invalid class signature for " + evt.getId() + " '" + invoker + "'");
 		}
 	}
 
@@ -87,7 +86,25 @@ public class NanoTransformer implements Runnable {
 	}
 
 	/**
+	 * clone and remove the instructions between the start and end index of the method
+	 *
+	 * @param list the original instructions
+	 * @param startIndex the index-1 where to start
+	 * @param endIndex the last index to copy + 1
+	 * @return the newly copied list
+	 */
+	public static InsnList cut(InsnList list, int startIndex, int endIndex) {
+		InsnList clone = clone(list, startIndex + 1, endIndex, a -> a);
+		for (int idex = endIndex; idex >= startIndex; idex--) {
+			AbstractInsnNode val = list.get(idex);
+			list.remove(val);
+		}
+		return clone;
+	}
+
+	/**
 	 * paste the copied instruction list into the method once for every listener
+	 *
 	 * @param listenerReferences all the listener's method references
 	 * @param node the method node
 	 * @param insnCopy the unmodified copied instruction list from the original method
@@ -121,23 +138,6 @@ public class NanoTransformer implements Runnable {
 			list.insert(start, modCopy);
 		}
 	}
-
-	/**
-	 * clone and remove the instructions between the start and end index of the method
-	 * @param list the original instructions
-	 * @param startIndex the index-1 where to start
-	 * @param endIndex the last index to copy + 1
-	 * @return the newly copied list
-	 */
-	public static InsnList cut(InsnList list, int startIndex, int endIndex) {
-		InsnList clone = clone(list, startIndex + 1, endIndex, a -> a);
-		for (int idex = endIndex; idex >= startIndex; idex--) {
-			AbstractInsnNode val = list.get(idex);
-			list.remove(val);
-		}
-		return clone;
-	}
-
 
 	/**
 	 * clones the list

@@ -14,9 +14,9 @@ import java.util.Properties;
 /**
  * the parser and container of data for the EVT file format,
  * the evt format is essentially
- *
+ * <p>
  * mod:namespace {
- *     // normal properties file inside but all whitespaces are removed, including the ones in strings
+ * // normal properties file inside but all whitespaces are removed, including the ones in strings
  * }
  */
 public class Evt {
@@ -34,6 +34,12 @@ public class Evt {
 	private final Collection<MixinPath> mixins;
 
 
+	public Evt(Id id, String invoker, Collection<MixinPath> mixins) {
+		this.id = id;
+		this.invoker = invoker;
+		this.mixins = mixins;
+	}
+
 	/**
 	 * parse the Evt config
 	 */
@@ -43,28 +49,24 @@ public class Evt {
 		// find event namespace
 		StringBuilder idBuilder = new StringBuilder();
 		while ((chr = reader.read()) != -1) {
-			if(!Character.isWhitespace(chr)) {
-				if(chr=='{')
-					break;
+			if (!Character.isWhitespace(chr)) {
+				if (chr == '{') break;
 				idBuilder.append(chr);
 			}
 		}
 
-		if(chr == -1)
-			throw new EOFException();
+		if (chr == -1) throw new EOFException();
 
 		// read the inner scope thing
 		StringBuilder inner = new StringBuilder();
 		while ((chr = reader.read()) != -1) {
-			if(!Character.isWhitespace(chr) || chr == '\n') {
-				if(chr=='}')
-					break;
+			if (!Character.isWhitespace(chr) || chr == '\n') {
+				if (chr == '}') break;
 				inner.append(chr);
 			}
 		}
 
-		if(chr == -1)
-			end = true;
+		if (chr == -1) end = true;
 
 		// load inside as properties
 		Properties properties = new Properties();
@@ -82,12 +84,6 @@ public class Evt {
 		}
 
 		return new Pair<>(new Evt(id, invoker, paths), end);
-	}
-
-	public Evt(Id id, String invoker, Collection<MixinPath> mixins) {
-		this.id = id;
-		this.invoker = invoker;
-		this.mixins = mixins;
 	}
 
 	public Id getId() {

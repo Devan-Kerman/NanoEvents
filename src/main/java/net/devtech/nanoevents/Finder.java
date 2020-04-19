@@ -34,10 +34,10 @@ class Finder {
 					String listener = (String) entry.getKey();
 					String eventId = (String) entry.getValue();
 					int colonIndex = eventId.indexOf(':');
-					if(colonIndex == -1) {
+					if (colonIndex == -1) {
 						LOGGER.severe("Invalid identifier: " + eventId + " in " + c + " in " + m.getMetadata().getId());
 					} else {
-						listeners.computeIfAbsent(new Id(listener.substring(0, colonIndex), listener.substring(colonIndex+1)), i -> new ArrayList<>()).add(listener);
+						listeners.computeIfAbsent(new Id(listener.substring(0, colonIndex), listener.substring(colonIndex + 1)), i -> new ArrayList<>()).add(listener);
 					}
 				}
 			} catch (IOException e) {
@@ -45,6 +45,21 @@ class Finder {
 			}
 		});
 		return listeners;
+	}
+
+	/**
+	 * util method for files in custom mod jsons
+	 */
+	private static void forVal(String val, BiConsumer<ModContainer, String> consumer) {
+		for (ModContainer mod : FabricLoader.getInstance().getAllMods()) {
+			ModMetadata metadata = mod.getMetadata();
+			CustomValue value = metadata.getCustomValue(val);
+			if (value.getType() == CustomValue.CvType.STRING) consumer.accept(mod, value.getAsString());
+			else if (value.getType() == CustomValue.CvType.ARRAY) for (CustomValue customValue : value.getAsArray()) {
+				if (customValue.getType() == CustomValue.CvType.STRING) consumer.accept(mod, customValue.getAsString());
+				else LOGGER.severe("Invalid type in array: " + value + " mod: " + metadata.getId());
+			}
+		}
 	}
 
 	/**
@@ -67,20 +82,5 @@ class Finder {
 			}
 		});
 		return events;
-	}
-
-	/**
-	 * util method for files in custom mod jsons
-	 */
-	private static void forVal(String val, BiConsumer<ModContainer, String> consumer) {
-		for (ModContainer mod : FabricLoader.getInstance().getAllMods()) {
-			ModMetadata metadata = mod.getMetadata();
-			CustomValue value = metadata.getCustomValue(val);
-			if (value.getType() == CustomValue.CvType.STRING) consumer.accept(mod, value.getAsString());
-			else if (value.getType() == CustomValue.CvType.ARRAY) for (CustomValue customValue : value.getAsArray()) {
-				if (customValue.getType() == CustomValue.CvType.STRING) consumer.accept(mod, customValue.getAsString());
-				else LOGGER.severe("Invalid type in array: " + value + " mod: " + metadata.getId());
-			}
-		}
 	}
 }

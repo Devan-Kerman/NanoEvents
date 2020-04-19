@@ -17,13 +17,12 @@ public class MixinPath {
 	 * checks if the class name fits in the path
 	 */
 	public boolean matches(String className) {
-		if(this.path.length() > className.length()) // star matches will always be smaller
+		if (this.path.length() > className.length()) // star matches will always be smaller
 			return false;
 		for (int i = 0; i < this.path.length(); i++) {
 			char at = this.path.charAt(i);
-			if(at == '*')
-				return true;
-			if(at != className.charAt(i)) {
+			if (at == '*') return true;
+			if (at != className.charAt(i)) {
 				return false;
 			}
 		}

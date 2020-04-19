@@ -21,6 +21,13 @@ public class Id {
 	}
 
 	@Override
+	public int hashCode() {
+		int result = this.mod.hashCode();
+		result = 31 * result + this.value.hashCode();
+		return result;
+	}
+
+	@Override
 	public boolean equals(Object o) {
 		if (this == o) return true;
 		if (o == null || this.getClass() != o.getClass()) return false;
@@ -29,12 +36,5 @@ public class Id {
 
 		if (!this.mod.equals(id.mod)) return false;
 		return this.value.equals(id.value);
-	}
-
-	@Override
-	public int hashCode() {
-		int result = this.mod.hashCode();
-		result = 31 * result + this.value.hashCode();
-		return result;
 	}
 }
