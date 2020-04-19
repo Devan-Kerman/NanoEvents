@@ -1,7 +1,8 @@
 # NanoEvents
 no overhead event based programming for the fabric minecraft modding toolchain
 
-Keep in mind this tool isn't here to be safe, it's here to be fast.
+Keep in mind this tool isn't here to be safe, it's here to be fast. There are all sorts of nonsense that comes with cutting and pasting
+abitrary bytecode.
 
 # Why?
 Mostly a proof of concept, but it is ready for use, and I intend to use it in the future. And sometimes events are geniunly performance critical.
