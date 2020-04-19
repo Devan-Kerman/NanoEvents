@@ -8,7 +8,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-// todo add a throw exception at the top of event handler methods that suck ass
+// todo add a throw exception at the top of event handler methods that suck ass 
 // todo check bytecode signatures of listeners
 // todo check access flags of listeners | force public
 // todo remap method signatures?

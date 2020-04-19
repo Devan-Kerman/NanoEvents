@@ -28,15 +28,16 @@ public class Invoker {
 	 * it, replacing all the shallow recursive calls with direct calls to the listeners. <b>I'm not here to hold your hand
 	 * this is an unsafe way of doing this, there's obvious issues with this system, for example</b>
 	 * the following code will be cut and paste by the transformer, but will lead to undefined behavior
-	 * <p>
+	 * <pre>
 	 * Invoker.start();
 	 * if(...) {
-	 * Invoker.end();
+	 *    Invoker.end();
 	 * }
-	 * <p>
+	 * </pre>
 	 * you may only have 1 start call, and 1 end call per method, so no funky ifs or any nonsense like that.
 	 */
-	public static void start() {}
+	public static void start() {
+	}
 
 	/**
 	 * this is the terminator for an invoker
