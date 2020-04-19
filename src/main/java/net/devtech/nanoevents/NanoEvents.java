@@ -24,4 +24,8 @@ public class NanoEvents {
 		}
 	}
 	// ========== do not touch ==========
+
+	public static boolean test() {
+		return true;
+	}
 }

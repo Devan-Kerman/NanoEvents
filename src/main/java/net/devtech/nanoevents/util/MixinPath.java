@@ -3,6 +3,7 @@ package net.devtech.nanoevents.util;
 /**
  * a path to a class
  * so like
+ *
  * net.devtech.Class
  * or
  * net.devtech.nanoevents.*

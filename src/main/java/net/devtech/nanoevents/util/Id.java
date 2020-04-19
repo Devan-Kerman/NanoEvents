@@ -37,4 +37,9 @@ public class Id {
 		if (!this.mod.equals(id.mod)) return false;
 		return this.value.equals(id.value);
 	}
+
+	@Override
+	public String toString() {
+		return this.mod + ":" + this.value;
+	}
 }

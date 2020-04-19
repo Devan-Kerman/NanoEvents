@@ -3,6 +3,7 @@ package net.devtech.nanoevents.asm;
 import com.chocohead.mm.api.ClassTinkerers;
 import net.devtech.nanoevents.NanoEvents;
 import net.devtech.nanoevents.api.Invoker;
+import net.devtech.nanoevents.api.Logic;
 import net.devtech.nanoevents.evtparser.Evt;
 import net.devtech.nanoevents.util.Id;
 import org.objectweb.asm.Label;
@@ -16,6 +17,7 @@ import java.util.logging.Logger;
 
 
 public class NanoTransformer implements Runnable {
+	private static final String LOGIC_TYPE = Type.getInternalName(Logic.class);
 	private static final String INVOKER_TYPE = Type.getInternalName(Invoker.class);
 	private static final Logger LOGGER = Logger.getLogger("NanoTransformer");
 
@@ -24,27 +26,20 @@ public class NanoTransformer implements Runnable {
 		for (Map.Entry<Id, Evt> entry : NanoEvents.EVENTS.entrySet()) {
 			Evt evt = entry.getValue();
 			String invoker = evt.getInvoker();
-			int semicolonIndex = invoker.indexOf(';');
-			if (semicolonIndex == -1) {
-				LOGGER.severe("Invalid method signature for " + evt.getId() + " '" + invoker + "'");
-				continue;
-			}
-			String classSignature = invoker.substring(0, semicolonIndex);
-			if (classSignature.charAt(0) == 'L') {
-				classSignature = classSignature.substring(1);
-				int nextSemicolon = invoker.indexOf(';', semicolonIndex + 1);
-				if (nextSemicolon == -1) {
-					LOGGER.severe("Invalid method name for " + evt.getId() + " '" + invoker + "'");
-					continue;
-				}
-				String methodName = invoker.substring(semicolonIndex + 1, nextSemicolon);
-				String methodDescriptor = invoker.substring(nextSemicolon + 1);
-				String finalClassSignature = classSignature;
-				ClassTinkerers.addTransformation(classSignature, invokerClass -> {
+			int hashTagIndex = invoker.indexOf('#');
+			if (hashTagIndex != -1) {
+				String classSignature = invoker.substring(0, hashTagIndex);
+				String methodName = invoker.substring(hashTagIndex+1);
+				ClassTinkerers.addTransformation(classSignature.replace('.', '/'), invokerClass -> {
 					for (MethodNode method : invokerClass.methods) {
-						if (method.name.equals(methodName) && method.desc.equals(methodDescriptor)) {
-							transform(NanoEvents.LISTENERS.get(entry.getKey()), method, invoker, finalClassSignature);
-							return;
+						for (AnnotationNode annotation : method.invisibleAnnotations) {
+							Id id = entry.getKey();
+							if(annotation.desc.equals(INVOKER_TYPE) && "value".equals(annotation.values.get(0)) && id.toString().equals(annotation.values.get(1))) { // todo check namespace
+								if (method.name.equals(methodName)) {
+									transform(NanoEvents.LISTENERS.get(id), method, invoker, classSignature);
+									return;
+								}
+							}
 						}
 					}
 					LOGGER.severe("No invoker found for " + evt.getId() + " '" + invoker + "'!");
@@ -68,7 +63,7 @@ public class NanoTransformer implements Runnable {
 			AbstractInsnNode node = insns.get(i);
 			if (node instanceof MethodInsnNode) {
 				MethodInsnNode methodNode = (MethodInsnNode) node;
-				if (INVOKER_TYPE.equals(methodNode.owner) && methodNode.desc.equals("()V")) { // check if it's a method in the Invoker class
+				if (LOGIC_TYPE.equals(methodNode.owner) && methodNode.desc.equals("()V")) { // check if it's a method in the Invoker class
 					if (methodNode.name.equals("start")) { // if it is a start
 						if (startMethod != -1) {
 							LOGGER.severe("You can only invoke start() once! please fix '" + invoker + "'");

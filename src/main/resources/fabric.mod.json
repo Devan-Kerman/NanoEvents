@@ -16,6 +16,9 @@
   "entrypoints": {
     "main": [
       "net.devtech.nanoevents.NanoEvents"
+    ],
+    "mm:earlyriser":[
+      ""
     ]
   },
   "mixins": [
@@ -24,5 +27,7 @@
   "depends": {
     "fabricloader": ">=0.8.2+build.194",
     "minecraft": "1.15.2"
-  }
+  },
+  "nano:evt": "events.evt",
+  "nano:lst": "listeners.properties"
 }

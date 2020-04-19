@@ -1,6 +1,6 @@
 package net.devtech.asm.playground;
 
-import net.devtech.nanoevents.api.Invoker;
+import net.devtech.nanoevents.api.Logic;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.BlockPos;
@@ -18,7 +18,7 @@ import java.util.function.Function;
 import java.util.logging.Logger;
 
 public class AsmPlayground {
-	private static final String INVOKER_TYPE = Type.getInternalName(Invoker.class);
+	private static final String INVOKER_TYPE = Type.getInternalName(Logic.class);
 	private static final Logger LOGGER = Logger.getLogger("NanoTransformer");
 
 	public static void main(String[] args) throws IOException {
@@ -44,9 +44,9 @@ public class AsmPlayground {
 
 	public static boolean invoker(PlayerEntity one, BlockPos pos, BlockState state) {
 		boolean cancelled = false;
-		Invoker.start();
+		Logic.start();
 		int i = 0;
-		Invoker.end();
+		Logic.end();
 		return cancelled;
 	}
 
