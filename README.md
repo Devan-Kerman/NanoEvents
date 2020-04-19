@@ -1,8 +1,10 @@
 # NanoEvents
 no overhead event based programming for the fabric minecraft modding toolchain
 
+Keep in mind this tool isn't here to be safe, it's here to be fast.
+
 # Why?
-Mostly a proof of concept, but it is ready for use, and I intend to use it in the future. Sometimes events are geniunly performance critical, 
+Mostly a proof of concept, but it is ready for use, and I intend to use it in the future. And sometimes events are geniunly performance critical.
 
 # How is this possible
 There's a few things here that are unique to minecraft in a way, [Mixin](https://github.com/SpongePowered/Mixin) is a bytecode transformation framework that abstracts bytecode changes in a way that's simple and easy to understand, and by using ASM based hooks, we can enable and disable them at runtime, whether or not there are listeners for our events. Mixin is platform independant, so in theory it could run anywhere, it's just most widely used in minecraft. Secondly, we can generate classes ahead of time to **directly** call our listener methods, reducing overhead even further.
