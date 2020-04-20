@@ -10,10 +10,14 @@ repositories {
     maven {
         url = 'https://raw.githubusercontent.com/Devan-Kerman/Devan-Repo/master/'
     }
+    maven { 
+        url 'https://jitpack.io' 
+    }
 }
 
 dependencies {
   modImplementation 'net.devtech:nanoevents:1.1'
+  modImplementation 'com.github.Chocohead:Fabric-ASM:v2.0.1'
 }
 ```
 
