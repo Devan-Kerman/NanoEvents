@@ -23,8 +23,8 @@ class Finder {
 	/**
 	 * find all the listeners declared in each mod
 	 */
-	public static Map<Id, Collection<String>> parseListeners() {
-		Map<Id, Collection<String>> listeners = new HashMap<>();
+	public static Map<Id, List<String>> parseListeners() {
+		Map<Id, List<String>> listeners = new HashMap<>();
 		forVal("nano:lst", (m, c) -> {
 			Path path = m.getPath(c);
 			try {

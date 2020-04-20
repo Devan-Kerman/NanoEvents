@@ -26,7 +26,7 @@ public class NanoEventMixinPlugin implements IMixinConfigPlugin {
 		if(wasApplied(mixinClassName)) {
 			return true;
 		} else {
-			LOGGER.info(mixinClassName + " was not applied because there are no listeners for it's event");
+			LOGGER.info(mixinClassName + " was not applied because there are no listeners for its event");
 			return false;
 		}
 	}

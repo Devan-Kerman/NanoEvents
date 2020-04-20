@@ -15,6 +15,14 @@ public class Id {
 	 */
 	public final String value;
 
+	public Id(String id) {
+		int colonIndex = id.indexOf(':');
+		if(colonIndex == -1)
+			throw new IllegalArgumentException(id + " is an invalid id");
+		this.mod = id.substring(0, colonIndex);
+		this.value = id.substring(colonIndex + 1);
+	}
+
 	public Id(String mod, String value) {
 		this.mod = mod;
 		this.value = value;

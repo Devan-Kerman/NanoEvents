@@ -15,7 +15,7 @@ import java.util.Map;
 public class NanoEvents {
 	// ========== do not touch ==========
 	@Deprecated public static final List<MixinPath> ENABLED = new ArrayList<>();
-	@Deprecated public static final Map<Id, Collection<String>> LISTENERS = Finder.parseListeners();
+	@Deprecated public static final Map<Id, List<String>> LISTENERS = Finder.parseListeners();
 	@Deprecated public static final Map<Id, Evt> EVENTS = Finder.getAllEvts();
 
 	static {
@@ -26,8 +26,4 @@ public class NanoEvents {
 		}
 	}
 	// ========== do not touch ==========
-
-	public static boolean test() {
-		return true;
-	}
 }

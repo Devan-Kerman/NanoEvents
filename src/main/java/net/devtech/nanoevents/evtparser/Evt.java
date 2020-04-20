@@ -25,18 +25,18 @@ public class Evt {
 	 */
 	private final Id id;
 	/**
-	 * the method signature of the invoker
+	 * the class the invoker is in
 	 */
-	private final String invoker;
+	private final String invokerClass;
 	/**
 	 * the mixin predicates, this determines whether or not a mixin should be applied
 	 */
 	private final Collection<MixinPath> mixins;
 
 
-	public Evt(Id id, String invoker, Collection<MixinPath> mixins) {
+	public Evt(Id id, String invokerClass, Collection<MixinPath> mixins) {
 		this.id = id;
-		this.invoker = invoker;
+		this.invokerClass = invokerClass;
 		this.mixins = mixins;
 	}
 
@@ -90,8 +90,8 @@ public class Evt {
 		return this.id;
 	}
 
-	public String getInvoker() {
-		return this.invoker;
+	public String getInvokerClass() {
+		return this.invokerClass;
 	}
 
 	public Collection<MixinPath> getMixins() {
