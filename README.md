@@ -47,38 +47,7 @@ Everything has a trade-off, not everything is perfect, so what are the disadvant
 listener, and rethrow it in your event system of choice.
 
 # Can we go EVEN FASTER???
-*Yes*, it is theoretically possible to go ***EVEN FASTER***. When I said zero overhead, I *technically* wasn't lying since if the event isn't listened to, there really isn't any overhead, but there is 2 possible optimizations you could do to make it even faster.
+*Yes*, it is theoretically possible to go ***EVEN FASTER***. When I said zero overhead, I *technically* wasn't lying since if the event isn't listened to, there really isn't any overhead, but there is 1 possible optimization you could do to make it even faster.
 
 ## Inlining
 You could aggressivly inline the listener methods on the mixins that invoke it, and inline the listener methods as well. However I suspect the JVM will already do this, as the depth is only 3, and they're all static methods, so it should have no trouble inlining these methods.
-
-## Initial Conditions
-When there is only 1 listener for an event, there are cases where you will check an extra condition that did not need checking,
-take the following standard implementation of a cancellable event as an example:
-```java
-public boolean invoker() {
-  boolean isCancelled = false;
-  Logic.start();
-  if(!isCancelled) {
-    isCancelled = invoker();
-  }
-  Logic.end();
-}
-```
-This will be the transformed invoker when there is only 1 listener
-```java
-public boolean invoker() {
-  boolean isCancelled = false;
-  if(!isCancelled) {
-    isCancelled = myListener();
-  }
-  return isCancelled;
-}
-```
-You can tell what the problem is here, much of that code is redundant, and can be simplified into
-```java
-public boolean invoker() {
-  return myListener();
-}
-```
-There's a few ways of allowing this to happen, like add an extra optional invoker for when there's only one listener, but I didn't bother
