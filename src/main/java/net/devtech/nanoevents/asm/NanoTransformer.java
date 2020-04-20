@@ -5,7 +5,7 @@ import net.devtech.nanoevents.NanoEvents;
 import net.devtech.nanoevents.api.Invoker;
 import net.devtech.nanoevents.api.Logic;
 import net.devtech.nanoevents.api.SingleInvoker;
-import net.devtech.nanoevents.evtparser.Evt;
+import net.devtech.nanoevents.evt.Evt;
 import net.devtech.nanoevents.util.Id;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Label;

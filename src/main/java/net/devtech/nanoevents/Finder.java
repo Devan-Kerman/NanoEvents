@@ -1,6 +1,6 @@
 package net.devtech.nanoevents;
 
-import net.devtech.nanoevents.evtparser.Evt;
+import net.devtech.nanoevents.evt.Evt;
 import net.devtech.nanoevents.util.Id;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;

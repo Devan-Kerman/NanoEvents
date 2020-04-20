@@ -1,4 +1,4 @@
-package testing.nano;
+package benchmarking.nano;
 
 public class NanoListeners {
 	public static int one(int i) {

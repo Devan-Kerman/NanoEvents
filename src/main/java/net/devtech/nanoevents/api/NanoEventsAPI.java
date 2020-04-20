@@ -12,18 +12,4 @@ public class NanoEventsAPI {
 	public static boolean isEnabled(Id val) {
 		return NanoEvents.LISTENERS.containsKey(val);
 	}
-
-	/**
-	 * checks if the mixin was applied
-	 * <p>
-	 * or, for internal use: should this mixin be applied
-	 */
-	public static boolean wasApplied(String mixinClassName) {
-		for (MixinPath path : NanoEvents.ENABLED) {
-			if (path.matches(mixinClassName)) {
-				return true;
-			}
-		}
-		return false;
-	}
 }

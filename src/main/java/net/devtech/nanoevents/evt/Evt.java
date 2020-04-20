@@ -1,4 +1,4 @@
-package net.devtech.nanoevents.evtparser;
+package net.devtech.nanoevents.evt;
 
 import net.devtech.nanoevents.util.Id;
 import net.devtech.nanoevents.util.MixinPath;
@@ -76,11 +76,14 @@ public class Evt {
 		// the id of the event
 		Id id = new Id(name[0], name[1]);
 		String invoker = properties.getProperty("invoker");
-		String[] path = properties.getProperty("classes").split(",");
+		String path = properties.getProperty("classes");
 
 		Collection<MixinPath> paths = new ArrayList<>();
-		for (String s : path) {
-			paths.add(new MixinPath(s));
+		if(path != null) {
+			String[] classes = path.split(",");
+			for (String s : classes) {
+				paths.add(new MixinPath(s));
+			}
 		}
 
 		return new Pair<>(new Evt(id, invoker, paths), end);

@@ -1,4 +1,4 @@
-package testing.nano;
+package benchmarking.nano;
 
 import net.devtech.nanoevents.api.Invoker;
 import net.devtech.nanoevents.api.Logic;
