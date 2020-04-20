@@ -11,7 +11,7 @@ repositories {
 }
 
 dependencies {
-  modImplementation 'net.devtech:nanoevents:1.0'
+  modImplementation 'net.devtech:nanoevents:1.1'
 }
 ```
 
