@@ -4,6 +4,20 @@ no overhead event based programming for the fabric minecraft modding toolchain
 Keep in mind this tool isn't here to be safe, it's here to be fast. There are all sorts of nonsense that comes with cutting and pasting
 abitrary bytecode.
 
+## Gradle
+```groovy
+repositories {
+    ...
+    maven {
+        url = 'https://raw.githubusercontent.com/Devan-Kerman/Devan-Repo/master/'
+    }
+}
+
+dependencies {
+  modImplementation 'net.devtech:nanoevents:1.0'
+}
+```
+
 ## Docs
 https://github.com/Devan-Kerman/NanoEvents/wiki
 
