@@ -1,4 +1,0 @@
-test:event {
-    invoker=net.devtech.nanoevents.testing.Test
-    classes=net.devtech.nanoevents.mixin.*
-}
