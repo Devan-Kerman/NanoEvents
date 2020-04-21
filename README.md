@@ -16,7 +16,7 @@ repositories {
 }
 
 dependencies {
-  modImplementation 'net.devtech:NanoEvents:1.0'
+  modImplementation 'net.devtech:NanoEvents:1.1'
   modImplementation 'com.github.Chocohead:Fabric-ASM:v2.0.1'
 }
 ```
