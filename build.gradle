@@ -29,6 +29,8 @@ dependencies {
     minecraft "com.mojang:minecraft:${project.minecraft_version}"
     mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
     modCompile "net.fabricmc:fabric-loader:${project.loader_version}"
+
+    // invoker transformation
     modImplementation 'com.github.Chocohead:Fabric-ASM:v2.0.1'
 
     // jmh
@@ -99,7 +101,6 @@ publishing {
     // select the repositories you want to publish to
     repositories {
         File gh = new File(projectDir.parentFile.parentFile.parentFile, "util/Devan-Repo")
-        System.out.println(gh)
         if(gh.exists()) {
             maven {
                 url = gh.absolutePath

@@ -1,4 +1,4 @@
-package net.devtech.nanoevents.api;
+package net.devtech.nanoevents.api.annotations;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

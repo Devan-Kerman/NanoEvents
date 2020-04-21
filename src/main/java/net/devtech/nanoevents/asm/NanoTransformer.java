@@ -2,23 +2,21 @@ package net.devtech.nanoevents.asm;
 
 import com.chocohead.mm.api.ClassTinkerers;
 import net.devtech.nanoevents.NanoEvents;
-import net.devtech.nanoevents.api.Invoker;
+import net.devtech.nanoevents.api.annotations.Invoker;
 import net.devtech.nanoevents.api.Logic;
-import net.devtech.nanoevents.api.SingleInvoker;
+import net.devtech.nanoevents.api.annotations.ListenerInvoker;
+import net.devtech.nanoevents.api.annotations.SingleInvoker;
 import net.devtech.nanoevents.evt.Evt;
 import net.devtech.nanoevents.util.Id;
 import org.objectweb.asm.ClassWriter;
-import org.objectweb.asm.Label;
 import org.objectweb.asm.Type;
 import org.objectweb.asm.tree.*;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Collection;
-import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 import java.util.logging.Logger;
 
 
@@ -27,6 +25,8 @@ public class NanoTransformer implements Runnable {
 	private static final String LOGIC_TYPE = Type.getInternalName(Logic.class);
 	private static final String INVOKER_TYPE = 'L' + Type.getInternalName(Invoker.class) + ';';
 	private static final String SINGLE_INVOKER_TYPE = 'L' + Type.getInternalName(SingleInvoker.class) + ';';
+	private static final String LISTENER_INVOKER_TYPE = 'L' + Type.getInternalName(ListenerInvoker.class) + ';';
+
 	private static final Logger LOGGER = Logger.getLogger("NanoTransformer");
 	static {
 		if(DEBUG_TRANSFORMER)
@@ -44,39 +44,50 @@ public class NanoTransformer implements Runnable {
 		}
 	}
 
+	/**
+	 * searches for the invoker method and extentions for the event and transforms the invoker
+	 * @param listeners the listeners for this event
+	 * @param node the class node
+	 * @param id the id of the event
+	 */
 	public static void transformClass(List<String> listeners, ClassNode node, Id id) {
-		MethodNode single = null; // if there's only one listener, check for single invokers
-		MethodNode invokerMethod = null;
-		for (MethodNode method : node.methods) {
-			List<AnnotationNode> annotations = method.invisibleAnnotations;
-			if (annotations != null && !annotations.isEmpty()) {
-				for (AnnotationNode annotation : annotations) {
-					List<Object> vals = annotation.values;
-					if (INVOKER_TYPE.equals(annotation.desc) && "value".equals(vals.get(0)) && vals.get(1).equals(id.toString())) { // todo check namespace
-						invokerMethod = method;
-						if(listeners.size() != 1)
-							break;
-					} else if (listeners.size() == 1 && SINGLE_INVOKER_TYPE.equals(annotation.desc)) {
-						// single invoker found
-						single = method;
+		Map<String, MethodNode> nodes = ASMUtil.methodFinder(node, m -> {
+			List<AnnotationNode> annotations = m.invisibleAnnotations;
+			if(annotations != null) for (AnnotationNode annotation : annotations) {
+				if(annotation.values.size() == 2 && id.toString().equals(annotation.values.get(1))) {
+					if (INVOKER_TYPE.equals(annotation.desc)) {
+						return "invoker";
+					} else if(listeners.size() == 1 && SINGLE_INVOKER_TYPE.equals(annotation.desc)) {
+						return "single_invoker";
+					} else if(LISTENER_INVOKER_TYPE.equals(annotation.desc)) {
+						return "listener_invoker";
 					}
 				}
 			}
-		}
+			return null;
+		});
 
+		MethodNode invokerMethod = nodes.get("invoker");
 		// if no single invoker found
 		if(invokerMethod == null) {
 			LOGGER.severe("No invoker found for " + id + " '" + node.name + "'!");
 			return;
 		}
 
+
+		MethodNode single = nodes.get("single_invoker");
+		MethodNode listenerInvoker = nodes.get("listener_invoker");
+
+		String desc = listenerInvoker == null ? invokerMethod.desc : listenerInvoker.desc;
 		if(single == null) {
-			transform(listeners, invokerMethod, node.name);
+			String name = listenerInvoker == null ? invokerMethod.name : listenerInvoker.name;
+			transform(listeners, invokerMethod.instructions, name, desc, node.name);
 		}
 
 		// single transformation
 		if(single != null) {
-			singleTransform(single, invokerMethod, node.name, listeners.get(0));
+			String name = listenerInvoker == null ? single.name : listenerInvoker.name;
+			invokerMethod.instructions = replace(single.instructions, name, node.name, desc, listeners.get(0));
 		}
 
 		if(DEBUG_TRANSFORMER) {
@@ -94,21 +105,18 @@ public class NanoTransformer implements Runnable {
 		}
 	}
 
-	private static void singleTransform(MethodNode single, MethodNode invoker, String invokerType, String listener) {
-		invoker.instructions = replace(single.instructions, single.name, invokerType, single.desc, listener);
-	}
-
 	/**
 	 * this method starts the cut and paste process of the listener, it first looks for a start
 	 * and end method, then it copies all the instructions in between, and pastes them over and over
 	 * again but replacing all <b>shallow</b> recursive invocations of the method with listener invocations
 	 *
 	 * @param invoker the invoker string (the owner class)
-	 * @param method the method node being transformed
+	 * @param desc the descriptor of the method to replace
+	 * @param insns the bytecode of the method to transform
+	 * @param name the name of the method to replace
 	 */
-	private static void transform(Collection<String> listeners, MethodNode method, String invoker) {
+	private static void transform(Collection<String> listeners, InsnList insns, String name, String desc, String invoker) {
 		int startMethod = -1;
-		InsnList insns = method.instructions;
 		for (int i = 0; i < insns.size(); i++) { // scan the whole method
 			AbstractInsnNode node = insns.get(i);
 			if (node instanceof MethodInsnNode) {
@@ -121,8 +129,8 @@ public class NanoTransformer implements Runnable {
 						}
 						startMethod = i; // store the starting point
 					} else if (methodNode.name.equals("end")) { // if it's the end
-						InsnList insnCopy = cut(insns, startMethod, i); // cut all the instructions from the method
-						paste(listeners, method, insnCopy, insns, invoker, startMethod); // and paste/modify them for every listener
+						InsnList insnCopy = ASMUtil.cut(insns, startMethod, i); // cut all the instructions from the method
+						pasteAndModify(listeners, insns, name, desc, insnCopy, invoker, startMethod); // and paste/modify them for every listener
 						break;
 					}
 				}
@@ -130,22 +138,7 @@ public class NanoTransformer implements Runnable {
 		}
 	}
 
-	/**
-	 * clone and remove the instructions between the start and end index of the method
-	 *
-	 * @param list the original instructions
-	 * @param startIndex the index-1 where to start
-	 * @param endIndex the last index to copy + 1
-	 * @return the newly copied list
-	 */
-	private static InsnList cut(InsnList list, int startIndex, int endIndex) {
-		InsnList clone = clone(list, startIndex + 1, endIndex, a -> a);
-		for (int idex = endIndex; idex >= startIndex; idex--) {
-			AbstractInsnNode val = list.get(idex);
-			list.remove(val);
-		}
-		return clone;
-	}
+
 
 	/**
 	 * replace all of shallow recursive call with a listener reference in a newly copied list
@@ -158,7 +151,7 @@ public class NanoTransformer implements Runnable {
 	 * @return a newly created edited copy of the orignal bytecode
 	 */
 	private static InsnList replace(InsnList list, String nodeName, String nodeOwner, String nodeDescriptor, String listenerReference) {
-		return clone(list, 0, list.size(), a -> { // copy the copied instruction list, but replace the recursive call with a listener one
+		return ASMUtil.clone(list, 0, list.size(), a -> { // copy the copied instruction list, but replace the recursive call with a listener one
 			if (a instanceof MethodInsnNode) {
 				MethodInsnNode replacementNode = (MethodInsnNode) a;
 				// check if method call is the right one
@@ -183,55 +176,19 @@ public class NanoTransformer implements Runnable {
 	 * paste the copied instruction list into the method once for every listener
 	 *
 	 * @param listenerReferences all the listener's method references
-	 * @param node the method node
+	 * @param insns the method's bytecode, sans the portion in between the first start/end block
+	 * @param desc the descriptor of the method to replace
+	 * @param name the name of the method to replace
 	 * @param insnCopy the unmodified copied instruction list from the original method
-	 * @param list the method's bytecode, sans the portion in between the first start/end block
 	 * @param type the internal name of the invoker's class
 	 * @param startIndex the index in the bytecode of the now removed start method
 	 */
-	private static void paste(Collection<String> listenerReferences, MethodNode node, InsnList insnCopy, InsnList list, String type, int startIndex) {
-		AbstractInsnNode start = list.get(startIndex);
+	private static void pasteAndModify(Collection<String> listenerReferences, InsnList insns, String name, String desc, InsnList insnCopy, String type, int startIndex) {
+		AbstractInsnNode start = insns.get(startIndex);
 		for (String listenerReference : listenerReferences) {
-			InsnList modCopy = replace(insnCopy, node.name, type, node.desc, listenerReference);
-			list.insert(start, modCopy);
+			InsnList modCopy = replace(insnCopy, name, type, desc, listenerReference);
+			insns.insert(start, modCopy);
 		}
-	}
-
-
-	/**
-	 * clones the list
-	 * Copied from https://github.com/Chocohead/Merger under MPL
-	 * Modified to suit my purposes
-	 */
-	private static InsnList clone(InsnList list, int fromIndex, int toIndex, Function<AbstractInsnNode, AbstractInsnNode> transformer) {
-		Map<LabelNode, LabelNode> clonedLabels = new IdentityHashMap<>();
-		Map<Label, Label> trueLabels = new IdentityHashMap<>();
-		boolean seenFrame = false;
-		for (int i = fromIndex; i < toIndex; i++) {
-			AbstractInsnNode insn = list.get(i);
-			switch (insn.getType()) {
-				case AbstractInsnNode.LABEL:
-					LabelNode node = (LabelNode) insn;
-					clonedLabels.put(node, new LabelNode(trueLabels.computeIfAbsent(node.getLabel(), k -> new Label())));
-					break;
-
-				case AbstractInsnNode.FRAME:
-					seenFrame = true;
-					break;
-			}
-		}
-
-		if (!seenFrame && clonedLabels.isEmpty()) return list; //Only clone the list if we have to
-
-		InsnList out = new InsnList();
-		for (int i = fromIndex; i < toIndex; i++) {
-			AbstractInsnNode insn = list.get(i);
-			AbstractInsnNode node = insn.clone(clonedLabels);
-			node = transformer.apply(node);
-			out.add(node);
-		}
-
-		return out;
 	}
 
 }

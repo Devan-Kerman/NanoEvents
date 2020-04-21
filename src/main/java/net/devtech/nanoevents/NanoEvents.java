@@ -8,10 +8,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-// todo add a throw exception at the top of event handler methods that suck ass 
 // todo check bytecode signatures of listeners
 // todo check access flags of listeners | force public
-// todo remap method signatures?
+// todo dynamic registry
+// todo remove test code, events.evt, listener.properties, fabric.mod.json custom
 public class NanoEvents implements ModInitializer {
 	// ========== do not touch ==========
 	@Deprecated public static final List<MixinPath> ENABLED = new ArrayList<>();
@@ -21,13 +21,15 @@ public class NanoEvents implements ModInitializer {
 	static {
 		for (Id id : LISTENERS.keySet()) {
 			if (LISTENERS.containsKey(id)) {
-				ENABLED.addAll(EVENTS.get(id).getMixins());
+				Evt evt = EVENTS.get(id);
+				if (evt != null) ENABLED.addAll(evt.getMixins());
 			}
 		}
 	}
 
 	@Override
 	public void onInitialize() {
+		// remove unessesary stuff from memory
 		ENABLED.clear();
 		EVENTS.clear();
 	}

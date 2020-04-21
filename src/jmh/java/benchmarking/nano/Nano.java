@@ -1,8 +1,8 @@
 package benchmarking.nano;
 
-import net.devtech.nanoevents.api.Invoker;
+import net.devtech.nanoevents.api.annotations.Invoker;
 import net.devtech.nanoevents.api.Logic;
-import net.devtech.nanoevents.api.SingleInvoker;
+import net.devtech.nanoevents.api.annotations.SingleInvoker;
 
 public class Nano {
 	@Invoker("nano:test")

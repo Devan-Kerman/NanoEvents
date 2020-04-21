@@ -14,13 +14,13 @@
   "icon": "assets/nanoevents/icon.png",
   "environment": "*",
   "entrypoints": {
+    "main": [
+      "net.devtech.nanoevents.NanoEvents"
+    ],
     "mm:early_risers":[
       "net.devtech.nanoevents.asm.NanoTransformer"
     ]
   },
-  "mixins": [
-    "nanoevents.mixins.json"
-  ],
   "depends": {
     "fabricloader": ">=0.7.0"
   }
