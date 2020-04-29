@@ -65,3 +65,8 @@ Everything has a trade-off, not everything is perfect, so what are the disadvant
 1) increased startup times: the penalty isn't too bad, and nothing like jar scanning, but there is a slight load time penalty nontheless.
 2) no dynamic registry: sometimes you need dynamic registry, but NanoEvents forbids it in the name of true 0 overhead. However that's not to say you can use NanoEvents **in conjunction** with dynamic events, you can just listen to the event on a statically declared
 listener, and rethrow it in your event system of choice.
+
+## Future features
+
+dynamic registry - it wouldn't be *as* fast, and you couldn't disable mixins ahead of time, but it's fast enough for most people. sacrifice performance for ease of use.
+
