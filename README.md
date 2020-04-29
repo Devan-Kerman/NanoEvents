@@ -60,6 +60,26 @@ there is virtually no difference between direct invocation and nanoevent handler
 ### MicroEvents is slow
 yea, I made MicroEvents, it's slow because it uses reflection to search for subclass listeners of the event
 
+Here's a benchmark with just nanoevents (with dynamic registry), direct invocation, and fabric callbacks
+```
+Benchmark                           Mode  Cnt          Score          Error  Units
+Bench.direct                       thrpt    5  535897233.207 �  4521146.041  ops/s
+Bench.fabric_callbacks             thrpt    5   64520488.648 �  8075224.643  ops/s
+Bench.nanoevents_dynamic_instance  thrpt    5  505367722.699 �  1908906.878  ops/s
+Bench.nanoevents_dynamic_static    thrpt    5  502780134.882 � 16932542.119  ops/s
+Bench.nanoevents_static            thrpt    5  535231948.958 �  1673582.059  ops/s
+```
+You'll notice that direct and all nanoevent methods nearly equal in overhead. As u can see, static registry and direct invocation
+are quite literally equal, the difference is around <.01%. dynamic_instance means lambdas were put in `private static final` fields
+and invoked via object invocation, and dynamic_static means static methods were invoked via object invocation. The difference between
+static registry and dynamic registry is miniscule, and quite literally a micro-optimization. However there's one aspect of static
+registries that set it apart, it's ability to disable mixins ahead of time, this sole advantage allows nanoevents to be theoretically
+faster than direct invocation!
+
+tl;dr Static registries are faster and better at the cost of usability, dynamic registries are far more common and easier to use.
+
+*Keep an eye out for dynamic registries*
+
 # Flaws
 Everything has a trade-off, not everything is perfect, so what are the disadvantages of this system
 1) increased startup times: the penalty isn't too bad, and nothing like jar scanning, but there is a slight load time penalty nontheless.
