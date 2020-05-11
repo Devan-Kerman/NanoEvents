@@ -80,6 +80,33 @@ tl;dr Static registries are faster and better at the cost of usability, dynamic 
 
 *Keep an eye out for dynamic registries*
 
+# Other notes about event apis
+## Priorities
+Priorities are terrible, *never* have a priority system in an event api
+ - no guarentee of the outcome of an event, without post-events, there's no way of telling if the event will be cancelled by some other listener down the line
+ - priority within priorities is not guarenteed, this means u cant solve the above problen by just registering your listener at the highest priority
+ ## event objects
+ I'm sure you've used an event system that uses event objects in the past, they're ubiquitus, and they suck.
+ event objects are things like ThingEvent, where the data for the event is stored inside an object.
+  - object allocation needed, slowing it down
+  - it doesn't actually add any usability, infact it simply makes your code more verbose, rather than just having the parameters of the function define the event, you need to getX, getY etc. for each of the objects, and constructing the object to throw it in the first place is a hassle too
+  - if the event system respects inherited listeners, then you're totally dead, now you need reflection to find the super classes of an event, adding immense overhead to your event system
+## Return type handling
+This is critical to an event system, but almost none of them have this. Only fabric callbacks and nanoevents have this feature.
+The ability for the user (thrower of the event) to determine for themselves how to deal with return types and values.
+Take for example a cancellable event, most apis have the cancellable event hardcoded, whether it be an interface or something else. In fabric you write the cancellable event logic yourself, which would look something like this
+```java
+for(Listener listener : listeners) {
+    if(listener.accept(...)) {
+        return;
+    }
+}
+```
+Say you want to implement an event where there are 3 possible states, and one of them stops the execution like a cancellable one.
+this is stupid to implement in other apis, you'd save a cancellable boolean in the event, and set it to true when a value that should
+cancel execution is set. A hacky workaround for something that shouldn't exist. The equivalent nanoevents and fabric callback code would
+be much cleaner, and doesn't require the same work arounds
+
 # Flaws
 Everything has a trade-off, not everything is perfect, so what are the disadvantages of this system
 1) increased startup times: the penalty isn't too bad, and nothing like jar scanning, but there is a slight load time penalty nontheless.
