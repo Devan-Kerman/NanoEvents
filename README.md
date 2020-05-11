@@ -134,8 +134,10 @@ It's quite easy to tell what a perfect api is now isn't it?
  - negative overhead (being able to disable from un-used mixins ahead of time)
  - decentralized (for usability)
  - no startup cost (almost impossible)
+ 
 However, accomplishing such a task is, as far as I'm aware, impossible.
-But with some cooperation it is possible to get close:
+
+However it is possible to get closer:
 1) posted-mixined class caching would reduce the startup cost, and make it almost 0, at that stage there is better places to optimize
 2) using instrumentation for events instead of mixin, the beuty of instrumentation is that u can dynamically transform classes, and remove/add bytecode on demand. It has it's limits though, it can only be used when run with a JDK, it's a hassle to setup, and can't add methods/fields at runtime.
 3) decentralized events are already happening with fabric callbacks and nanoevents, and I hope other platforms adopt them
