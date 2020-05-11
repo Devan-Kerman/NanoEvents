@@ -121,12 +121,7 @@ Everything has a trade-off, not everything is perfect, so what are the disadvant
 listener, and rethrow it in your event system of choice.
 
 ## Future features
-dynamic registry - it wouldn't be *as* fast as you couldn't disable mixins ahead of time, but it's fast enough for most people. sacrifice performance for ease of use.
-
-# Takes
-What is the perfect event api, and is it even possible?
- - In my eyes, a perfect api would be nanoevents, but more accessible and usable. Right now creating an event is very jank, as it relies on magic bytecode copying to do it's magic, it's the best system I could come up with. My justification is that, those who *make* events are often more experienced than those who listen to them, since making events requires understanding on how to implement them. Dynamic registry may come to nanoevents in the near future, and that would put it fairly close to my ideal api, but there's still a few other problems.
- - dynamic registry can't turn off mixins in advance, in most cases this isn't a concern, and dynamic registries are often a better choice, no-op mixed in code calling a asm-made invoker has an almost un-measurable impact on performance, so the tradeoff is more than worth it.
+dynamic registry - it wouldn't be *as* fast as you couldn't disable mixins ahead of time, but it's fast enough for most people. sacrifice performance for ease of use
  
 # In conclusion
 It's quite easy to tell what a perfect api is now isn't it?
