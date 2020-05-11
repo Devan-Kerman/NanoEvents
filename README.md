@@ -107,6 +107,13 @@ this is stupid to implement in other apis, you'd save a cancellable boolean in t
 cancel execution is set. A hacky workaround for something that shouldn't exist. The equivalent nanoevents and fabric callback code would
 be much cleaner, and doesn't require the same work arounds.
 
+### Re-Iteration
+## Dynamic Registries
+Dynamic registries require iteration, which is slow, however a dynamic registry is comparably much easier to use than a static one, so I wouldn't use it as a point of critism ~~until I add dynamic registry to nanoevents~~
+
+## Centralized Registry
+Centralized registries are things like bukkit events (bukkit) or eventbus (forge), both of these are flawed and although the benchmark does show them performing poorly, in a real world scenario when there are typically multiple types of events, sometimes reaching tripple digits, the cost skyrockets. The problem here is you need a hashmap to go from the event type to a list of listeners of some sort. This adds a layer of unessesary overhead that becomes worse when reflection is used. Centralized registries have the same/less usability as decentralized ones. They're often limited in what they can do (see: return type handling), and in both cases you need to reference some class or similar to register your events, for example forge uses typetools (concern) to determine the listener type, but you still need to declare the event object as a parameter, so why not just handle the event in the event itself? Infact some registries actually are *less* usable than decentralized ones, like bukkit, where you must declare the type and register it seperately.
+
 # Flaws
 Everything has a trade-off, not everything is perfect, so what are the disadvantages of this system
 1) increased startup times: the penalty isn't too bad, and nothing like jar scanning, but there is a slight load time penalty nontheless.
@@ -116,3 +123,25 @@ listener, and rethrow it in your event system of choice.
 ## Future features
 dynamic registry - it wouldn't be *as* fast as you couldn't disable mixins ahead of time, but it's fast enough for most people. sacrifice performance for ease of use.
 
+# Takes
+What is the perfect event api, and is it even possible?
+ - In my eyes, a perfect api would be nanoevents, but more accessible and usable. Right now creating an event is very jank, as it relies on magic bytecode copying to do it's magic, it's the best system I could come up with. My justification is that, those who *make* events are often more experienced than those who listen to them, since making events requires understanding on how to implement them. Dynamic registry may come to nanoevents in the near future, and that would put it fairly close to my ideal api, but there's still a few other problems.
+ - dynamic registry can't turn off mixins in advance, in most cases this isn't a concern, and dynamic registries are often a better choice, no-op mixed in code calling a asm-made invoker has an almost un-measurable impact on performance, so the tradeoff is more than worth it.
+ 
+# In conclusion
+It's quite easy to tell what a perfect api is now isn't it?
+ - no overhead (must be as fast as direct invocation, using the JIT to your advantage isn't really cheating)
+ - negative overhead (being able to disable from un-used mixins ahead of time)
+ - decentralized (for usability)
+ - no startup cost (almost impossible)
+However, accomplishing such a task is, as far as I'm aware, impossible.
+But with some cooperation it is possible to get close:
+1) posted-mixined class caching would reduce the startup cost, and make it almost 0, at that stage there is better places to optimize
+2) using instrumentation for events instead of mixin, the beuty of instrumentation is that u can dynamically transform classes, and remove/add bytecode on demand. It has it's limits though, it can only be used when run with a JDK, it's a hassle to setup, and can't add methods/fields at runtime.
+3) decentralized events are already happening with fabric callbacks and nanoevents, and I hope other platforms adopt them
+4) In my opinion asm is the path for performance, it's one of java's greatest advantages in my eyes, the fact that u can dynamically create code and have it still be optimized is ridiculously powerful.
+5) ahead-of-time dynamic events. Jar scanning is not an option for startup costs, however the jar can be scanned at build time to determine what events the user uses. This allows for dynamic registration while still having negative overhead. However that doesn't come at a cost either, the user has to install a gradle plugin or external program to post-process their jar. If a system is officially added to loom however, this con dissapears.
+
+Most if not all of these are out of the scope of nanoevents, and would require work in fabric to become a reality.
+
+So no, a perfect event api *isn't* possible, but we can get very, very close.
