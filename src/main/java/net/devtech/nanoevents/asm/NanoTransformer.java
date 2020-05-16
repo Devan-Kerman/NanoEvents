@@ -2,8 +2,8 @@ package net.devtech.nanoevents.asm;
 
 import com.chocohead.mm.api.ClassTinkerers;
 import net.devtech.nanoevents.NanoEvents;
-import net.devtech.nanoevents.api.annotations.Invoker;
 import net.devtech.nanoevents.api.Logic;
+import net.devtech.nanoevents.api.annotations.Invoker;
 import net.devtech.nanoevents.api.annotations.ListenerInvoker;
 import net.devtech.nanoevents.api.annotations.SingleInvoker;
 import net.devtech.nanoevents.evt.Evt;
@@ -40,36 +40,21 @@ public class NanoTransformer implements Runnable {
 			Id id = evt.getId();
 			List<String> listeners = NanoEvents.LISTENERS.get(id);
 			String invokerType = invoker.replace('.', '/');
-			ClassTinkerers.addTransformation(invokerType, node -> transformClass(listeners, node, id));
+			ClassTinkerers.addTransformation(invokerType, node -> transformClass(listeners, node, id, find(listeners, node, id)));
 		}
 	}
 
 	/**
 	 * searches for the invoker method and extentions for the event and transforms the invoker
+	 *
 	 * @param listeners the listeners for this event
 	 * @param node the class node
 	 * @param id the id of the event
 	 */
-	public static void transformClass(List<String> listeners, ClassNode node, Id id) {
-		Map<String, MethodNode> nodes = ASMUtil.methodFinder(node, m -> {
-			List<AnnotationNode> annotations = m.invisibleAnnotations;
-			if(annotations != null) for (AnnotationNode annotation : annotations) {
-				if(annotation.values.size() == 2 && id.toString().equals(annotation.values.get(1))) {
-					if (INVOKER_TYPE.equals(annotation.desc)) {
-						return "invoker";
-					} else if(listeners.size() == 1 && SINGLE_INVOKER_TYPE.equals(annotation.desc)) {
-						return "single_invoker";
-					} else if(LISTENER_INVOKER_TYPE.equals(annotation.desc)) {
-						return "listener_invoker";
-					}
-				}
-			}
-			return null;
-		});
-
+	public static void transformClass(List<String> listeners, ClassNode node, Id id, Map<String, MethodNode> nodes) {
 		MethodNode invokerMethod = nodes.get("invoker");
 		// if no single invoker found
-		if(invokerMethod == null) {
+		if (invokerMethod == null) {
 			LOGGER.severe("No invoker found for " + id + " '" + node.name + "'!");
 			return;
 		}
@@ -91,10 +76,9 @@ public class NanoTransformer implements Runnable {
 		}
 
 		if(DEBUG_TRANSFORMER) {
-			File file = new File("nano_debug/"+node.name+".class");
+			File file = new File("nano_debug/" + node.name + ".class");
 			File parent = file.getParentFile();
-			if(!parent.exists())
-				parent.mkdirs();
+			if(!parent.exists()) parent.mkdirs();
 			try (FileOutputStream output = new FileOutputStream(file)) {
 				ClassWriter writer = new ClassWriter(0);
 				node.accept(writer);
@@ -103,6 +87,24 @@ public class NanoTransformer implements Runnable {
 				e.printStackTrace();
 			}
 		}
+	}
+
+	public static Map<String, MethodNode> find(List<String> listeners, ClassNode node, Id id) {
+		return ASMUtil.methodFinder(node, m -> {
+			List<AnnotationNode> annotations = m.invisibleAnnotations;
+			if (annotations != null) for (AnnotationNode annotation : annotations) {
+				if (annotation.values.size() == 2 && id.toString().equals(annotation.values.get(1))) {
+					if (INVOKER_TYPE.equals(annotation.desc)) {
+						return "invoker";
+					} else if (listeners.size() == 1 && SINGLE_INVOKER_TYPE.equals(annotation.desc)) {
+						return "single_invoker";
+					} else if (LISTENER_INVOKER_TYPE.equals(annotation.desc)) {
+						return "listener_invoker";
+					}
+				}
+			}
+			return null;
+		});
 	}
 
 	/**

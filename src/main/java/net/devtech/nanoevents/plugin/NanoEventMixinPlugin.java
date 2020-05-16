@@ -25,7 +25,8 @@ public class NanoEventMixinPlugin implements IMixinConfigPlugin {
 	@Override
 	public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
 		for (MixinPath path : NanoEvents.ENABLED) {
-			if (path.matches(mixinClassName)) return true;
+			if (path.matches(mixinClassName)) // if mixin path was found, todo optimize
+				return true;
 		}
 		LOGGER.info(mixinClassName + " was not applied because there are no listeners for its event");
 		return false;

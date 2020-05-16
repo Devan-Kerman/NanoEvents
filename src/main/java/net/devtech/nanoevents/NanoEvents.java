@@ -8,9 +8,18 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-// todo check bytecode signatures of listeners
-// todo check access flags of listeners | force public
+// soon:tm:
 // todo dynamic registry
+
+// == requires partial rewrite? ==
+// todo mutliple start/end cut and pastes
+
+// == requires listener modification ==
+// todo check bytecode signatures of listeners
+// todo check access flags of listeners or force public
+// todo multi-invokers?
+
+// == before publish ==
 // todo remove test code, events.evt, listener.properties, fabric.mod.json custom
 public class NanoEvents implements ModInitializer {
 	// ========== do not touch ==========
@@ -19,10 +28,9 @@ public class NanoEvents implements ModInitializer {
 	@Deprecated public static final Map<Id, Evt> EVENTS = Finder.getAllEvts();
 
 	static {
-		for (Id id : LISTENERS.keySet()) {
-			if (LISTENERS.containsKey(id)) {
-				Evt evt = EVENTS.get(id);
-				if (evt != null) ENABLED.addAll(evt.getMixins());
+		for (Evt value : EVENTS.values()) {
+			if (LISTENERS.containsKey(value.getId()) || !value.isNoOp()) {
+				ENABLED.addAll(value.getMixins());
 			}
 		}
 	}

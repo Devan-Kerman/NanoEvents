@@ -3,7 +3,7 @@ package net.devtech.nanoevents.api;
 /**
  * This is the class you use to create invoker methods, it has 2 methods, start, and end
  */
-public class Logic {
+public final class Logic {
 	private Logic() {
 		/*some examples of invokers*/
 		{
@@ -13,10 +13,12 @@ public class Logic {
 			// problem
 			boolean cancelled = false;
 			start();
-			if (!cancelled) ;
-			//invoker();
+			if (/*invoker()*/ false)
+				// cancelled
+				return /*true*/;
 			end();
-			return /*cancelled*/;
+			// not cancelled
+			return /*false*/;
 		}
 		// more soon:tm:
 

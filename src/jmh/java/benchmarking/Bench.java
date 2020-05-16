@@ -1,68 +1,39 @@
 package benchmarking;
 
+import benchmarking.dynamic.NanoDynamicInstance;
+import benchmarking.dynamic.NanoDynamicStatic;
+import benchmarking.fabric.SumCallback;
 import benchmarking.nano.NanoListeners;
 import org.openjdk.jmh.annotations.*;
+import org.openjdk.jmh.infra.Blackhole;
 
-// shuttle api and microevents needed
 @Warmup (iterations = 10,
          batchSize = 10_000)
 @Fork (1)
 @Threads (1)
 @State (Scope.Benchmark)
 public class Bench {
-	/*private static EventManager eventManager;
-	private static ShuttleEventTracker<SumEvent.SumCallbackListener, SumEvent> shuttleEventTracker;
-
 	@Setup
 	public void setup() {
-		eventManager = new MicroEventManager();
 		SumCallback.EVENT.register(i -> i + 1);
 		SumCallback.EVENT.register(i -> i + 2);
 		SumCallback.EVENT.register(i -> i + 3);
-
-		eventManager.registerEvent(SumEvent.class);
-		eventManager.registerListener(SumEvent.class, s -> s.setSum(s.getSum() + s.getSum() + 1), Priority.NORMAL, false);
-		eventManager.registerListener(SumEvent.class, s -> s.setSum(s.getSum() + s.getSum() + 2), Priority.NORMAL, false);
-		eventManager.registerListener(SumEvent.class, s -> s.setSum(s.getSum() + s.getSum() + 3), Priority.NORMAL, false);
-
-		new EventType<SumCallback>("nano:event") {};
-
-		shuttleEventTracker = ShuttleEventTracker.of(SumEvent.SumCallbackListener.class, SumEvent.class, (e, l) -> {
-			for (SumEvent.SumCallbackListener listener : l) {
-				e.setSum(e.getSum() + listener.sum(e.getSum()));
-			}
-		});
-
-		shuttleEventTracker.subscribe(i -> i + 1);
-		shuttleEventTracker.subscribe(i -> i + 2);
-		shuttleEventTracker.subscribe(i -> i + 3);
+		NanoDynamicInstance.instance = new NanoDynamicInstance();
+		NanoDynamicStatic.instance = new NanoDynamicStatic();
 	}
 
 	@Benchmark
-	public void shuttle(Blackhole blackhole) {
-		SumEvent event = new SumEvent(0);
-		shuttleEventTracker.postEvent(event);
-		blackhole.consume(event.getSum());
+	public void nanoevents_dynamic_static(Blackhole blackhole) {
+		blackhole.consume(NanoDynamicStatic.invoker(0));
 	}
 
 	@Benchmark
-	public void microEvents(Blackhole blackhole) {
-		SumEvent event = new SumEvent(0);
-		eventManager.invoke(event);
-		blackhole.consume(event.getSum());
+	public void nanoevents_dynamic_instance(Blackhole blackhole) {
+		blackhole.consume(NanoDynamicInstance.invoker(0));
 	}
 
 	@Benchmark
-	public void valo(Blackhole blackhole) {
-		int sum = 0;
-		for (Object subscriber : EventsImpl.getEventType(new Id("nano:event")).subscribers) {
-			sum += ((SumCallback) subscriber).invoke(sum);
-		}
-		blackhole.consume(sum);
-	}
-
-	@Benchmark
-	public void invoker(Blackhole blackhole) {
+	public void nanoevents_static(Blackhole blackhole) {
 		blackhole.consume(invoke(0));
 	}
 
@@ -76,7 +47,7 @@ public class Bench {
 	}
 
 	@Benchmark
-	public void fabric(Blackhole blackhole) {
+	public void fabric_callbacks(Blackhole blackhole) {
 		blackhole.consume(SumCallback.EVENT.invoker().invoke(0));
 	}
 

@@ -32,6 +32,7 @@ dependencies {
 
     // invoker transformation
     modImplementation 'com.github.Chocohead:Fabric-ASM:v2.0.1'
+    include 'com.github.Chocohead:Fabric-ASM:v2.0.1'
 
     // jmh
     jmhImplementation 'org.openjdk.jmh:jmh-core:1.21'

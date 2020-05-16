@@ -16,7 +16,7 @@ import java.util.Properties;
  * the evt format is essentially
  * <p>
  * mod:namespace {
- * // normal properties file inside but all whitespaces are removed, including the ones in strings
+ * // normal properties file inside but all whitespaces are removed (except newlines), including the ones in strings
  * }
  */
 public class Evt {
@@ -33,11 +33,17 @@ public class Evt {
 	 */
 	private final Collection<MixinPath> mixins;
 
+	/**
+	 * true if the event has no side effects when there are no listeners
+	 */
+	private final boolean noOp;
 
-	public Evt(Id id, String invokerClass, Collection<MixinPath> mixins) {
+
+	public Evt(Id id, String invokerClass, Collection<MixinPath> mixins, boolean op) {
 		this.id = id;
 		this.invokerClass = invokerClass;
 		this.mixins = mixins;
+		this.noOp = op;
 	}
 
 	/**
@@ -51,7 +57,7 @@ public class Evt {
 		while ((chr = reader.read()) != -1) {
 			if (!Character.isWhitespace(chr)) {
 				if (chr == '{') break;
-				idBuilder.append((char)chr);
+				idBuilder.append((char) chr);
 			}
 		}
 
@@ -62,7 +68,7 @@ public class Evt {
 		while ((chr = reader.read()) != -1) {
 			if (!Character.isWhitespace(chr) || chr == '\n') {
 				if (chr == '}') break;
-				inner.append((char)chr);
+				inner.append((char) chr);
 			}
 		}
 
@@ -77,16 +83,19 @@ public class Evt {
 		Id id = new Id(name[0], name[1]);
 		String invoker = properties.getProperty("invoker");
 		String path = properties.getProperty("classes");
+		// isn't this just "true".equals? not for nulls it isn't
+		// it's basically true-by-default
+		boolean noop = !"false".equals(properties.getProperty("noOp"));
 
 		Collection<MixinPath> paths = new ArrayList<>();
-		if(path != null) {
+		if (path != null) {
 			String[] classes = path.split(",");
 			for (String s : classes) {
 				paths.add(new MixinPath(s));
 			}
 		}
 
-		return new Pair<>(new Evt(id, invoker, paths), end);
+		return new Pair<>(new Evt(id, invoker, paths, noop), end);
 	}
 
 	public Id getId() {
@@ -99,5 +108,9 @@ public class Evt {
 
 	public Collection<MixinPath> getMixins() {
 		return this.mixins;
+	}
+
+	public boolean isNoOp() {
+		return this.noOp;
 	}
 }
