@@ -18,8 +18,8 @@ repositories {
 dependencies {
     // nanoevents 1.3 and beyond now JiJ fabric-asm
     modImplementation 'net.devtech:NanoEvents:1.3'
-    // but because gradle is bad
-    modImplementation 'com.github.Chocohead:Fabric-ASM:v2.0.1'
+    // if you intend on JIJing NanoEvents yourself
+    include 'com.github.Chocohead:Fabric-ASM:v2.0.1'
 }
 ```
 
