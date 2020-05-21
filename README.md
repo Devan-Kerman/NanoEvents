@@ -17,7 +17,7 @@ repositories {
 
 dependencies {
     // nanoevents 1.3 and beyond now JiJ fabric-asm
-    modImplementation 'net.devtech:NanoEvents:1.3'
+    modImplementation 'net.devtech:NanoEvents:1.4'
 }
 ```
 
