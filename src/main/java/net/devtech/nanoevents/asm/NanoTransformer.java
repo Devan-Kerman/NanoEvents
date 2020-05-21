@@ -15,6 +15,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -28,9 +29,9 @@ public class NanoTransformer implements Runnable {
 	private static final String LISTENER_INVOKER_TYPE = 'L' + Type.getInternalName(ListenerInvoker.class) + ';';
 
 	private static final Logger LOGGER = Logger.getLogger("NanoTransformer");
+
 	static {
-		if(DEBUG_TRANSFORMER)
-			LOGGER.info("Transformer debugging is enabled!");
+		if (DEBUG_TRANSFORMER) LOGGER.info("Transformer debugging is enabled!");
 	}
 
 	@Override
@@ -40,7 +41,11 @@ public class NanoTransformer implements Runnable {
 			Id id = evt.getId();
 			List<String> listeners = NanoEvents.LISTENERS.get(id);
 			String invokerType = invoker.replace('.', '/');
-			ClassTinkerers.addTransformation(invokerType, node -> transformClass(listeners, node, id, find(listeners, node, id)));
+			ClassTinkerers.addTransformation(invokerType, node -> {
+				List<String> list = listeners;
+				if (list == null) list = Collections.emptyList();
+				transformClass(list, node, id, find(list, node, id));
+			});
 		}
 	}
 
@@ -64,21 +69,21 @@ public class NanoTransformer implements Runnable {
 		MethodNode listenerInvoker = nodes.get("listener_invoker");
 
 		String desc = listenerInvoker == null ? invokerMethod.desc : listenerInvoker.desc;
-		if(single == null) {
+		if (single == null) {
 			String name = listenerInvoker == null ? invokerMethod.name : listenerInvoker.name;
 			transform(listeners, invokerMethod.instructions, name, desc, node.name);
 		}
 
 		// single transformation
-		if(single != null) {
+		if (single != null) {
 			String name = listenerInvoker == null ? single.name : listenerInvoker.name;
 			invokerMethod.instructions = replace(single.instructions, name, node.name, desc, listeners.get(0));
 		}
 
-		if(DEBUG_TRANSFORMER) {
+		if (DEBUG_TRANSFORMER) {
 			File file = new File("nano_debug/" + node.name + ".class");
 			File parent = file.getParentFile();
-			if(!parent.exists()) parent.mkdirs();
+			if (!parent.exists()) parent.mkdirs();
 			try (FileOutputStream output = new FileOutputStream(file)) {
 				ClassWriter writer = new ClassWriter(0);
 				node.accept(writer);
@@ -141,7 +146,6 @@ public class NanoTransformer implements Runnable {
 	}
 
 
-
 	/**
 	 * replace all of shallow recursive call with a listener reference in a newly copied list
 	 *
@@ -159,14 +163,14 @@ public class NanoTransformer implements Runnable {
 				// check if method call is the right one
 				if (replacementNode.name.equals(nodeName) && replacementNode.owner.equals(nodeOwner) && replacementNode.desc.equals(nodeDescriptor)) {
 					// parse the listener reference
-					int classIndex = listenerReference.indexOf('#');
+					int classIndex = listenerReference.indexOf("::");
 					if (classIndex == -1) {
 						LOGGER.severe("Bad method signature " + listenerReference);
 						replacementNode.owner = "null";
 						replacementNode.name = "READ_THE_LOGS";
 					} else {
 						replacementNode.owner = listenerReference.substring(0, classIndex).replace('.', '/');
-						replacementNode.name = listenerReference.substring(classIndex + 1);
+						replacementNode.name = listenerReference.substring(classIndex + 2);
 					}
 				}
 			}

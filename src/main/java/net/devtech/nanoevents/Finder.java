@@ -27,23 +27,13 @@ class Finder {
 		Map<Id, List<String>> listeners = new HashMap<>();
 		forVal("nano:lst", (m, c) -> {
 			Path path = m.getPath(c);
-			try {
-				Properties properties = new Properties();
-				properties.load(Files.newBufferedReader(path));
-				for (Map.Entry<Object, Object> entry : properties.entrySet()) {
-					String listener = (String) entry.getKey();
-					String eventId = (String) entry.getValue();
-					int colonIndex = eventId.indexOf(':');
-					if (colonIndex == -1) {
-						LOGGER.severe("Invalid identifier: " + eventId + " in " + c + " in " + m.getMetadata().getId());
-					} else {
-						listeners.computeIfAbsent(new Id(eventId.substring(0, colonIndex), eventId.substring(colonIndex + 1)), i -> new ArrayList<>()).add(listener);
-					}
+			if (Files.isDirectory(path)) {
+				try {
+					Files.list(path).forEach(v -> parse(listeners, v, m, v.toString()));
+				} catch (IOException e) {
+					throw new RuntimeException(e);
 				}
-			} catch (IOException e) {
-				LOGGER.severe("error in reading listneers in " + path + " in mod " + m.getMetadata().getId());
-				e.printStackTrace();
-			}
+			} else parse(listeners, path, m, c);
 		});
 		return listeners;
 	}
@@ -55,13 +45,33 @@ class Finder {
 		for (ModContainer mod : FabricLoader.getInstance().getAllMods()) {
 			ModMetadata metadata = mod.getMetadata();
 			CustomValue value = metadata.getCustomValue(val);
-			if(value != null) {
+			if (value != null) {
 				if (value.getType() == CustomValue.CvType.STRING) consumer.accept(mod, value.getAsString());
 				else if (value.getType() == CustomValue.CvType.ARRAY) for (CustomValue customValue : value.getAsArray()) {
 					if (customValue.getType() == CustomValue.CvType.STRING) consumer.accept(mod, customValue.getAsString());
 					else LOGGER.severe("Invalid type in array: " + value + " mod: " + metadata.getId());
 				}
 			}
+		}
+	}
+
+	private static void parse(Map<Id, List<String>> listeners, Path path, ModContainer mod, String file) {
+		try {
+			Properties properties = new Properties();
+			properties.load(Files.newBufferedReader(path));
+			for (Map.Entry<Object, Object> entry : properties.entrySet()) {
+				String listener = (String) entry.getKey();
+				String eventId = (String) entry.getValue();
+				int colonIndex = eventId.indexOf(':');
+				if (colonIndex == -1) {
+					LOGGER.severe("Invalid identifier: " + eventId + " in " + file + " in " + mod.getMetadata().getId());
+				} else {
+					listeners.computeIfAbsent(new Id(eventId.substring(0, colonIndex), eventId.substring(colonIndex + 1)), i -> new ArrayList<>()).add(listener);
+				}
+			}
+		} catch (IOException e) {
+			LOGGER.severe("error in reading listneers in " + path + " in mod " + mod.getMetadata().getId());
+			e.printStackTrace();
 		}
 	}
 
