@@ -1,7 +1,7 @@
 # NanoEvents
 no overhead event based programming for the fabric minecraft modding toolchain
 
-This lib needs [🍫](https://github.com/Chocohead/Fabric-ASM) to work
+Powered by [🍫](https://github.com/Chocohead/Fabric-ASM)
 
 ## Gradle
 ```groovy
@@ -16,8 +16,8 @@ repositories {
 }
 
 dependencies {
-  modImplementation 'net.devtech:NanoEvents:1.1'
-  modImplementation 'com.github.Chocohead:Fabric-ASM:v2.0.1'
+    // nanoevents 1.3 and beyond now JiJ fabric-asm
+    modImplementation 'net.devtech:NanoEvents:1.4'
 }
 ```
 
