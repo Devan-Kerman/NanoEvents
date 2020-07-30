@@ -10,14 +10,16 @@ repositories {
     maven {
         url = 'https://raw.githubusercontent.com/Devan-Kerman/Devan-Repo/master/'
     }
-    maven { 
-        url 'https://jitpack.io' 
-    }
+    //maven { 
+    //    url 'https://jitpack.io' 
+    //}
 }
 
 dependencies {
     // nanoevents 1.3 and beyond now JiJ fabric-asm
-    modImplementation 'net.devtech:NanoEvents:1.4'
+    // [1.0-1.4]
+    // 2.0
+    modImplementation 'net.devtech:NanoEvents:2.0'
 }
 ```
 
