@@ -10,9 +10,9 @@ repositories {
     maven {
         url = 'https://raw.githubusercontent.com/Devan-Kerman/Devan-Repo/master/'
     }
-    //maven { 
-    //    url 'https://jitpack.io' 
-    //}
+    maven { 
+        url 'https://jitpack.io' 
+    }
 }
 
 dependencies {
@@ -20,6 +20,7 @@ dependencies {
     // [1.0-1.4]
     // 2.0
     modImplementation 'net.devtech:NanoEvents:2.0'
+    implementation 'org.ini4j:ini4j:0.5.4'
 }
 ```
 
