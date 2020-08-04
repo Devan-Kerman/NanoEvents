@@ -19,7 +19,8 @@ dependencies {
     // nanoevents 1.3 and beyond now JiJ fabric-asm
     // [1.0-1.4]
     // [2.0-2.2]
-    modImplementation 'net.devtech:NanoEvents:2.2'
+    // [3.0.0-3.0.2]
+    modImplementation 'net.devtech:NanoEvents:3.0.2'
 }
 ```
 
