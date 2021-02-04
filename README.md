@@ -40,7 +40,7 @@ on using this alongside NanoEvents when dynamic registry is needed. This has the
 manager finds all the listeners accociated with an event (often with a hashmap) and invokes them, it should be fairly obvious why this
 is a bad idea.
 
-[Fabric API Callbacks](https://github.com/FabricMC/fabric) This is similar to microevents, I'm not sure how much optimization exists in the backend as I haven't really looked into it, but it has the advantage of having non-centralised registries, which makes events significantly faster and easier to use. This also has the same problem as all dynamic event registries.
+[Fabric API Callbacks](https://github.com/FabricMC/fabric) This is the ideal event api without resorting to asm in my opinion
 
 ## Benchmarks
 ```
